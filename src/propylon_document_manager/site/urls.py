@@ -10,6 +10,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 urlpatterns = [
     # API base url
     path("api/", include("propylon_document_manager.site.api_router")),
+    path("api/accounts/", include("propylon_document_manager.accounts.urls")),
     # DRF auth token
     path("api-auth/", include("rest_framework.urls")),
     path("auth-token/", obtain_auth_token),
