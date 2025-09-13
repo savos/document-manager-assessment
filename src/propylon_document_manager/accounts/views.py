@@ -32,7 +32,10 @@ class LoginView(APIView):
             if user:
                 token, _ = Token.objects.get_or_create(user=user)
                 return Response({"token": token.key})
-            return Response({"detail": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid email address or password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
