@@ -30,7 +30,6 @@ profile = "black"
 line_length = 119
 known_first_party = [
     "propylon_document_manager",
-    "config",
 ]
 skip = ["venv/"]
 skip_glob = ["**/migrations/*.py"]
@@ -55,7 +54,7 @@ module = "*.migrations.*"
 ignore_errors = true
 
 [tool.django-stubs]
-django_settings_module = "config.settings.test"
+django_settings_module = "tests.settings"
 
 
 # ==== PyLint ====
@@ -63,7 +62,7 @@ django_settings_module = "config.settings.test"
 load-plugins = [
     "pylint_django",
 ]
-django-settings-module = "config.settings.local"
+django-settings-module = "propylon_document_manager.site.settings.local"
 
 [tool.pylint.FORMAT]
 max-line-length = 119

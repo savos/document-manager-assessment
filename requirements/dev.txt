@@ -4,9 +4,9 @@
 #
 #    pip-compile requirements/local.in
 #
-argon2-cffi==23.1.0
+argon2-cffi
     # via -r requirements/base.in
-argon2-cffi-bindings==21.2.0
+argon2-cffi-bindings
     # via argon2-cffi
 asgiref==3.7.2
     # via
