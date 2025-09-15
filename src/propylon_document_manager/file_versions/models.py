@@ -34,3 +34,14 @@ class User(AbstractUser):
 class FileVersion(models.Model):
     file_name = models.fields.CharField(max_length=512)
     version_number = models.fields.IntegerField()
+
+
+class UserFileVersion(models.Model):
+    fileversion = models.ForeignKey(FileVersion, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "file_versions_user_fileversion"
