@@ -59,29 +59,31 @@ export default function DocumentManager() {
 
   return (
     <Box display="flex" flexDirection="column" height="100vh" m={2}>
-      <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Button variant="contained" onClick={triggerUpload}>Upload</Button>
-          <input ref={fileInputRef} type="file" hidden onChange={handleUpload} />
+      <Box display="flex" flexDirection="column" flexGrow={1} sx={{ width: '128ch' }}>
+        <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Button variant="contained" onClick={triggerUpload}>Upload</Button>
+            <input ref={fileInputRef} type="file" hidden onChange={handleUpload} />
+          </Box>
+          <Button variant="contained" onClick={handleDownload} disabled={!selectedFile}>Download</Button>
         </Box>
-        <Button variant="contained" onClick={handleDownload} disabled={!selectedFile}>Download</Button>
-      </Box>
-      <Box flexGrow={1} display="flex" flexDirection="column">
-        <Box mb={2}>
-          <Typography variant="subtitle1">Files</Typography>
-        </Box>
-        <Box flexGrow={1} overflow="auto" sx={{ width: '128ch' }}>
-          <List>
-            {files.map((file) => (
-              <ListItemButton
-                key={file.id}
-                selected={selectedFile?.id === file.id}
-                onClick={() => setSelectedFile(file)}
-              >
-                <ListItemText primary={file.file_name} />
-              </ListItemButton>
-            ))}
-          </List>
+        <Box flexGrow={1} display="flex" flexDirection="column">
+          <Box mb={2}>
+            <Typography variant="subtitle1">Files</Typography>
+          </Box>
+          <Box flexGrow={1} overflow="auto">
+            <List>
+              {files.map((file) => (
+                <ListItemButton
+                  key={file.id}
+                  selected={selectedFile?.id === file.id}
+                  onClick={() => setSelectedFile(file)}
+                >
+                  <ListItemText primary={file.file_name} />
+                </ListItemButton>
+              ))}
+            </List>
+          </Box>
         </Box>
       </Box>
     </Box>
