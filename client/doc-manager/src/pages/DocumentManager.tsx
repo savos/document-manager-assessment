@@ -14,6 +14,8 @@ export default function DocumentManager() {
   const [newDirName, setNewDirName] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const token = localStorage.getItem('token')
+  const authHeader = token ? { Authorization: `Token ${token}` } : {}
 
   const openModal = () => {
     setNewDirName('')
@@ -32,14 +34,14 @@ export default function DocumentManager() {
     formData.append('name', newDirName)
     const response = await fetch('/api/file_versions/directories/', {
       method: 'POST',
+      headers: authHeader,
       body: formData,
-      credentials: 'include',
     })
     if (response.ok) {
       setDirectories([...directories, newDirName])
       closeModal()
     } else {
-      setError('Cannot create directory with that name')
+      setError('Unable to create directory with that name.')
     }
   }
 
@@ -55,8 +57,8 @@ export default function DocumentManager() {
     formData.append('directory', selectedDir)
     const response = await fetch('/api/file_versions/upload/', {
       method: 'POST',
+      headers: authHeader,
       body: formData,
-      credentials: 'include',
     })
     if (response.ok) {
       const data = await response.json()
@@ -68,7 +70,7 @@ export default function DocumentManager() {
   const handleDownload = async () => {
     if (!selectedFile) return
     const response = await fetch(`/api/file_versions/${selectedFile.id}/download/`, {
-      credentials: 'include',
+      headers: authHeader,
     })
     if (response.ok) {
       const blob = await response.blob()
@@ -84,10 +86,11 @@ export default function DocumentManager() {
   }
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/4 border-r flex flex-col">
-        <div className="flex justify-between p-2">
-          <button onClick={openModal} className="rounded bg-blue-600 px-2 py-1 text-white">+ Dir</button>
+    <div className="flex h-screen border border-gray-400">
+      <div className="w-1/4 flex h-full flex-col border border-gray-300">
+        <div className="flex items-center justify-between border-b p-2">
+          <span className="font-semibold">Tree</span>
+          <button onClick={openModal} className="rounded bg-blue-600 px-2 py-1 text-white">New Folder</button>
         </div>
         <div className="flex-1 overflow-auto">
           <ul className="p-2">
@@ -113,7 +116,10 @@ export default function DocumentManager() {
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
         </div>
       </div>
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex h-full flex-col border border-gray-300">
+        <div className="flex items-center justify-between border-b p-2">
+          <span className="font-semibold">Files</span>
+        </div>
         <div className="flex-1 overflow-auto">
           <ul className="p-2">
             {files.map((file) => (
