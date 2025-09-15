@@ -10,8 +10,8 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import TreeView from '@mui/lab/TreeView'
-import TreeItem from '@mui/lab/TreeItem'
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
+import { TreeItem } from '@mui/x-tree-view/TreeItem'
 
 interface FileItem {
   id: number
@@ -20,7 +20,7 @@ interface FileItem {
 
 export default function DocumentManager() {
   const [directories, setDirectories] = useState<string[]>([])
-  const [selectedDir, setSelectedDir] = useState<string>('')
+  const [selectedDir, setSelectedDir] = useState<string>('root')
   const [files, setFiles] = useState<FileItem[]>([])
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -43,7 +43,7 @@ export default function DocumentManager() {
       return
     }
     const formData = new FormData()
-    formData.append('parent', selectedDir)
+    formData.append('parent', selectedDir === 'root' ? '' : selectedDir)
     formData.append('name', newDirName)
     const response = await fetch('/api/file_versions/directories/', {
       method: 'POST',
@@ -54,7 +54,7 @@ export default function DocumentManager() {
       setDirectories([...directories, newDirName])
       closeModal()
     } else {
-      setError('Cannot create a directory with that name.')
+      setError('Unable to create a directory with that name.')
     }
   }
 
@@ -67,7 +67,7 @@ export default function DocumentManager() {
     const file = e.target.files[0]
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('directory', selectedDir)
+    formData.append('directory', selectedDir === 'root' ? '' : selectedDir)
     const response = await fetch('/api/file_versions/upload/', {
       method: 'POST',
       headers: authHeader,
@@ -106,13 +106,16 @@ export default function DocumentManager() {
           <Button variant="contained" size="small" onClick={openModal}>Add Directory</Button>
         </Box>
         <Box flexGrow={1} overflow="auto" p={1}>
-          <TreeView selected={selectedDir} onNodeSelect={(_, id) => setSelectedDir(id)}>
-            <TreeItem nodeId="" label="Root">
+          <SimpleTreeView
+            selectedItems={[selectedDir]}
+            onSelectedItemsChange={(_, ids: string[]) => setSelectedDir(ids[0] ?? 'root')}
+          >
+            <TreeItem itemId="root" label="Root">
               {directories.map((dir) => (
-                <TreeItem key={dir} nodeId={dir} label={dir} />
+                <TreeItem key={dir} itemId={dir} label={dir} />
               ))}
             </TreeItem>
-          </TreeView>
+          </SimpleTreeView>
         </Box>
         <Box p={1}>
           <Button variant="contained" onClick={triggerUpload}>Upload</Button>
