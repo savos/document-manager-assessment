@@ -99,10 +99,12 @@ export default function DocumentManager() {
               Root
             </li>
             {directories.map((dir) => {
-              const label = dir.split('/').slice(-1)[0]
+              const segments = dir.split('/')
+              const label = segments[segments.length - 1]
               return (
                 <li
                   key={dir}
+                  title={dir}
                   className={`cursor-pointer p-1 ${selectedDir === dir ? 'font-bold' : ''}`}
                   onClick={() => setSelectedDir(dir)}
                 >

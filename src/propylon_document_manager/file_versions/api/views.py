@@ -7,13 +7,13 @@ from django.utils.encoding import smart_str
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
+from django.db.models import Max
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from django.db.models import Max
 
 from ..models import FileVersion
 from .serializers import FileVersionSerializer
@@ -21,6 +21,8 @@ from .serializers import FileVersionSerializer
 
 @method_decorator(csrf_exempt, name="dispatch")
 class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
+    """API endpoints for listing, uploading, and downloading file versions."""
+
     permission_classes = [IsAuthenticated]
     serializer_class = FileVersionSerializer
     queryset = FileVersion.objects.all()
