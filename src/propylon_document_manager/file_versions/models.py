@@ -32,6 +32,6 @@ class User(AbstractUser):
 
 
 class FileVersion(models.Model):
-    path = models.fields.CharField(max_length=256, null=True)
+    path = models.fields.CharField(max_length=256, null=True, default=None)
     file_name = models.fields.CharField(max_length=512)
     version_number = models.fields.IntegerField()
