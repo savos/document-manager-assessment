@@ -50,3 +50,55 @@ def test_get_file_data_raises_when_not_found(tmp_path: Path):
 
     with pytest.raises(FileVersion.DoesNotExist):
         downloader._get_file_data(filepath=str(file_path), version=0)
+
+
+@pytest.mark.django_db
+def test_download_returns_file(tmp_path: Path, settings):
+    file_path = tmp_path / "nested" / "report.txt"
+    storage_dir = tmp_path / "storage"
+    digest_hex = "a" * 64
+
+    settings.FILES_ROOT = storage_dir
+
+    storage_dir.mkdir(parents=True)
+    stored_file = storage_dir / digest_hex
+    stored_file.write_text("example content")
+
+    FileVersion.objects.create(
+        file_name=str(file_path),
+        version_number=0,
+        digest_hex=digest_hex,
+    )
+
+    downloader = FileDownload(filepath=str(file_path), version=0)
+
+    message = downloader.download()
+
+    assert message == f"File {file_path} downloaded successfully"
+    assert file_path.exists()
+    assert file_path.read_text() == "example content"
+
+
+@pytest.mark.django_db
+def test_download_returns_message_when_missing(tmp_path: Path, settings):
+    settings.FILES_ROOT = tmp_path / "storage"
+
+    downloader = FileDownload(filepath=str(tmp_path / "missing.txt"))
+
+    assert downloader.download() == "That file does not exist on the server"
+
+
+@pytest.mark.django_db
+def test_download_returns_message_when_source_missing(tmp_path: Path, settings):
+    file_path = tmp_path / "report.txt"
+    settings.FILES_ROOT = tmp_path / "storage"
+
+    FileVersion.objects.create(
+        file_name=str(file_path),
+        version_number=0,
+        digest_hex="b" * 64,
+    )
+
+    downloader = FileDownload(filepath=str(file_path), version=0)
+
+    assert downloader.download() == "That file does not exist on the server"
