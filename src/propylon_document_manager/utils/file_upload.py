@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import shutil
 from pathlib import Path
 from typing import Union
 
+from django.conf import settings
 from django.db.models import Max
 
 
@@ -56,6 +58,35 @@ class FileUpload:
             return 0
 
         return latest_version + 1
+
+    def upload(self) -> str:
+        """Store the uploaded file and create its database record."""
+
+        from propylon_document_manager.file_versions.models import FileVersion
+
+        if self.check_duplicate():
+            return "File already exists."
+
+        storage_directory = Path(settings.FILES_ROOT)
+        destination_path = storage_directory / self.digest_hex
+
+        if destination_path.exists():
+            return "File already exists."
+
+        try:
+            storage_directory.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(self.filepath, destination_path)
+        except OSError as exc:
+            return f"Error saving {self.filepath}: {exc}"
+
+        version_number = self.get_latest_version()
+        FileVersion.objects.create(
+            file_name=str(self.filepath),
+            version_number=version_number,
+            digest_hex=self.digest_hex,
+        )
+
+        return f"File {self.filepath} saved successfully"
 
 
 __all__ = ["FileUpload"]
