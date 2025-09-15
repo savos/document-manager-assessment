@@ -88,6 +88,9 @@ export default function DocumentManager() {
               ))}
             </List>
           </Box>
+          <Box mt={2} display="flex" justifyContent="center">
+            <Button variant="outlined">Diff</Button>
+          </Box>
         </Box>
       </Box>
     </Box>
