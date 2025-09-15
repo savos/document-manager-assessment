@@ -34,6 +34,12 @@ class User(AbstractUser):
 class FileVersion(models.Model):
     file_name = models.fields.CharField(max_length=512)
     version_number = models.fields.IntegerField()
+    digest_hex = models.fields.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text="SHA-256 digest for the stored file in hexadecimal format.",
+    )
 
 
 class UserFileVersion(models.Model):
