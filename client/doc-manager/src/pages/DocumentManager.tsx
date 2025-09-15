@@ -10,7 +10,8 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { TreeView, TreeItem } from '@mui/lab'
+import TreeView from '@mui/lab/TreeView'
+import TreeItem from '@mui/lab/TreeItem'
 
 interface FileItem {
   id: number
@@ -101,8 +102,8 @@ export default function DocumentManager() {
     <Box display="flex" height="100vh" border={1} borderColor="grey.400">
       <Box width="25%" display="flex" flexDirection="column" borderRight={1} borderColor="grey.300">
         <Box display="flex" justifyContent="space-between" alignItems="center" p={1} borderBottom={1} borderColor="grey.300">
-          <Typography variant="subtitle1">Tree</Typography>
-          <Button variant="contained" size="small" onClick={openModal}>+ dir</Button>
+          <Typography variant="subtitle1">Directories</Typography>
+          <Button variant="contained" size="small" onClick={openModal}>Add Directory</Button>
         </Box>
         <Box flexGrow={1} overflow="auto" p={1}>
           <TreeView selected={selectedDir} onNodeSelect={(_, id) => setSelectedDir(id)}>
