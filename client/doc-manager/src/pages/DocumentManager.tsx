@@ -20,6 +20,8 @@ export default function DocumentManager() {
   const token = localStorage.getItem('token')
   const authHeader = token ? { Authorization: `Token ${token}` } : undefined
 
+  const handleDiff = () => {}
+
   const handleSignOut = () => {
     localStorage.removeItem('token')
     navigate('/')
@@ -64,7 +66,7 @@ export default function DocumentManager() {
           Sign Out
         </Link>
       </Box>
-      <Box display="flex" flexDirection="column" flexGrow={1} sx={{ width: '64ch' }}>
+      <Box display="flex" flexDirection="column" flexGrow={1} pb={9} sx={{ width: '64ch' }}>
         <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
           <Button variant="contained" disabled>
             Upload
@@ -89,7 +91,9 @@ export default function DocumentManager() {
             </List>
           </Box>
           <Box mt={2} display="flex" justifyContent="center">
-            <Button variant="outlined">Diff</Button>
+            <Button variant="contained" onClick={handleDiff}>
+              Diff
+            </Button>
           </Box>
         </Box>
       </Box>
