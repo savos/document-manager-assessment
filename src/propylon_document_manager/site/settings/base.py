@@ -167,7 +167,7 @@ MEDIA_ROOT = str(APPS_DIR / "media")
 MEDIA_URL = "/media/"
 
 # Directory for uploaded files
-FILES_ROOT = BASE_DIR.parent / "files"
+FILES_ROOT = BASE_DIR.parent.parent / "files"
 
 # TEMPLATES
 # ------------------------------------------------------------------------------

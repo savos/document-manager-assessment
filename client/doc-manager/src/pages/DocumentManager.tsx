@@ -1,4 +1,17 @@
 import { useRef, useState } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemText from '@mui/material/ListItemText'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import TreeView from '@mui/lab/TreeView'
+import TreeItem from '@mui/lab/TreeItem'
 
 interface FileItem {
   id: number
@@ -41,7 +54,7 @@ export default function DocumentManager() {
       setDirectories([...directories, newDirName])
       closeModal()
     } else {
-      setError('Unable to create directory with that name.')
+      setError('Cannot create a directory with that name.')
     }
   }
 
@@ -86,80 +99,67 @@ export default function DocumentManager() {
   }
 
   return (
-    <div className="flex h-screen border border-gray-400">
-      <div className="w-1/4 flex h-full flex-col border border-gray-300">
-        <div className="flex items-center justify-between border-b p-2">
-          <span className="font-semibold">Tree</span>
-          <button onClick={openModal} className="rounded bg-blue-600 px-2 py-1 text-white">New Folder</button>
-        </div>
-        <div className="flex-1 overflow-auto">
-          <ul className="p-2">
-            <li
-              className={`cursor-pointer p-1 ${selectedDir === '' ? 'font-bold' : ''}`}
-              onClick={() => setSelectedDir('')}
-            >
-              Root
-            </li>
-            {directories.map((dir) => (
-              <li
-                key={dir}
-                className={`cursor-pointer p-1 ${selectedDir === dir ? 'font-bold' : ''}`}
-                onClick={() => setSelectedDir(dir)}
-              >
-                {dir}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="p-2">
-          <button onClick={triggerUpload} className="rounded bg-green-600 px-2 py-1 text-white">Upload</button>
-          <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-        </div>
-      </div>
-      <div className="flex-1 flex h-full flex-col border border-gray-300">
-        <div className="flex items-center justify-between border-b p-2">
-          <span className="font-semibold">Files</span>
-        </div>
-        <div className="flex-1 overflow-auto">
-          <ul className="p-2">
+    <Box display="flex" height="100vh" border={1} borderColor="grey.400">
+      <Box width="25%" display="flex" flexDirection="column" borderRight={1} borderColor="grey.300">
+        <Box display="flex" justifyContent="space-between" alignItems="center" p={1} borderBottom={1} borderColor="grey.300">
+          <Typography variant="subtitle1">Tree</Typography>
+          <Button variant="contained" size="small" onClick={openModal}>+ dir</Button>
+        </Box>
+        <Box flexGrow={1} overflow="auto" p={1}>
+          <TreeView selected={selectedDir} onNodeSelect={(_, id) => setSelectedDir(id)}>
+            <TreeItem nodeId="" label="Root">
+              {directories.map((dir) => (
+                <TreeItem key={dir} nodeId={dir} label={dir} />
+              ))}
+            </TreeItem>
+          </TreeView>
+        </Box>
+        <Box p={1}>
+          <Button variant="contained" onClick={triggerUpload}>Upload</Button>
+          <input ref={fileInputRef} type="file" hidden onChange={handleUpload} />
+        </Box>
+      </Box>
+      <Box flexGrow={1} display="flex" flexDirection="column">
+        <Box p={1} borderBottom={1} borderColor="grey.300">
+          <Typography variant="subtitle1">Files</Typography>
+        </Box>
+        <Box flexGrow={1} overflow="auto" p={1}>
+          <List>
             {files.map((file) => (
-              <li
+              <ListItemButton
                 key={file.id}
-                className={`cursor-pointer p-1 ${selectedFile?.id === file.id ? 'bg-gray-200' : ''}`}
+                selected={selectedFile?.id === file.id}
                 onClick={() => setSelectedFile(file)}
               >
-                {file.file_name}
-              </li>
+                <ListItemText primary={file.file_name} />
+              </ListItemButton>
             ))}
-          </ul>
-        </div>
-        <div className="p-2 flex justify-end">
-          <button
-            onClick={handleDownload}
-            disabled={!selectedFile}
-            className="rounded bg-blue-600 px-2 py-1 text-white disabled:opacity-50"
-          >
-            Download
-          </button>
-        </div>
-      </div>
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-80 rounded bg-white p-4">
-            <label className="mb-2 block text-sm font-medium">Add New Directory</label>
-            <input
-              className="mb-4 w-full rounded border p-2"
-              value={newDirName}
-              onChange={(e) => setNewDirName(e.target.value)}
-            />
-            {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
-            <div className="flex justify-end space-x-2">
-              <button onClick={closeModal} className="rounded bg-gray-300 px-3 py-1">Cancel</button>
-              <button onClick={handleAddDirectory} className="rounded bg-blue-600 px-3 py-1 text-white">Add</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </List>
+        </Box>
+        <Box p={1} display="flex" justifyContent="flex-end">
+          <Button variant="contained" onClick={handleDownload} disabled={!selectedFile}>Download</Button>
+        </Box>
+      </Box>
+      <Dialog open={showModal} onClose={closeModal} fullWidth maxWidth="xs">
+        <DialogTitle>Add New Directory</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            value={newDirName}
+            onChange={(e) => setNewDirName(e.target.value)}
+          />
+          {error && (
+            <Typography color="error" variant="body2" mt={1}>
+              {error}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeModal}>Cancel</Button>
+          <Button onClick={handleAddDirectory}>Add</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   )
 }
