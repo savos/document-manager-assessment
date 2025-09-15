@@ -75,3 +75,36 @@ def test_file_upload_view_handles_missing_file(user):
 
     assert response.status_code == 404
     assert "detail" in response.json()
+
+
+@pytest.mark.django_db
+def test_file_upload_duplicate_detection(tmp_path):
+    file_path = tmp_path / "duplicate.txt"
+    file_contents = "duplicate content"
+    file_path.write_text(file_contents)
+
+    FileVersion.objects.create(
+        file_name="existing.txt",
+        version_number=1,
+        digest_hex=hashlib.sha256(file_contents.encode()).hexdigest(),
+    )
+
+    uploader = FileUpload(file_path)
+
+    assert uploader.check_duplicate() is True
+
+
+@pytest.mark.django_db
+def test_file_upload_duplicate_detection_returns_false(tmp_path):
+    file_path = tmp_path / "unique.txt"
+    file_path.write_text("unique content")
+
+    FileVersion.objects.create(
+        file_name="different.txt",
+        version_number=1,
+        digest_hex="0" * 64,
+    )
+
+    uploader = FileUpload(file_path)
+
+    assert uploader.check_duplicate() is False

@@ -29,5 +29,15 @@ class FileUpload:
                 hasher.update(chunk)
         return hasher.hexdigest()
 
+    def check_duplicate(self) -> bool:
+        """Check whether a file with the same digest already exists."""
+
+        from propylon_document_manager.file_versions.models import FileVersion
+
+        if not self.digest_hex:
+            return False
+
+        return FileVersion.objects.filter(digest_hex=self.digest_hex).exists()
+
 
 __all__ = ["FileUpload"]
