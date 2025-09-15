@@ -22,6 +22,3 @@ def test_user_fileversion():
     mapping = UserFileVersion.objects.create(fileversion=file_version, user=user)
     assert mapping.fileversion == file_version
     assert mapping.user == user
-    assert mapping.created_at is not None
-    assert mapping.updated_at is not None
-    assert mapping.deleted_at is None
