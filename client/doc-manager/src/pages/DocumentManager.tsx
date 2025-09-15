@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import List from '@mui/material/List'
@@ -14,33 +14,11 @@ interface FileItem {
 }
 
 export default function DocumentManager() {
-  const [files, setFiles] = useState<FileItem[]>([])
+  const [files] = useState<FileItem[]>([])
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
-  const authHeader = token ? { Authorization: `Token ${token}` } : {}
-
-  const triggerUpload = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return
-    const file = e.target.files[0]
-    const formData = new FormData()
-    formData.append('file', file)
-    const response = await fetch('/api/file_versions/upload/', {
-      method: 'POST',
-      headers: authHeader,
-      body: formData,
-    })
-    if (response.ok) {
-      const data = await response.json()
-      setFiles([...files, data])
-    }
-    e.target.value = ''
-  }
+  const authHeader = token ? { Authorization: `Token ${token}` } : undefined
 
   const handleSignOut = () => {
     localStorage.removeItem('token')
@@ -50,7 +28,7 @@ export default function DocumentManager() {
   const handleDownload = async () => {
     if (!selectedFile) return
     const response = await fetch(`/api/file_versions/${selectedFile.id}/download/`, {
-      headers: authHeader,
+      ...(authHeader ? { headers: authHeader } : {}),
     })
     if (response.ok) {
       const blob = await response.blob()
@@ -88,10 +66,9 @@ export default function DocumentManager() {
       </Box>
       <Box display="flex" flexDirection="column" flexGrow={1} sx={{ width: '64ch' }}>
         <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Button variant="contained" onClick={triggerUpload}>Upload</Button>
-            <input ref={fileInputRef} type="file" hidden onChange={handleUpload} />
-          </Box>
+          <Button variant="contained" disabled>
+            Upload
+          </Button>
           <Button variant="contained" onClick={handleDownload} disabled={!selectedFile}>Download</Button>
         </Box>
         <Box flexGrow={1} display="flex" flexDirection="column">
