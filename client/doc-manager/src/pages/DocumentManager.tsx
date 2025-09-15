@@ -59,7 +59,7 @@ export default function DocumentManager() {
 
   return (
     <Box display="flex" flexDirection="column" height="100vh" m={2}>
-      <Box display="flex" flexDirection="column" flexGrow={1} sx={{ width: '128ch' }}>
+      <Box display="flex" flexDirection="column" flexGrow={1} sx={{ width: '64ch' }}>
         <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Button variant="contained" onClick={triggerUpload}>Upload</Button>
