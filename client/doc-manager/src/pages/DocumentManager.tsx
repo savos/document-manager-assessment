@@ -10,7 +10,6 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { SimpleTreeView, TreeItem } from '@mui/x-tree-view'
 
 interface FileItem {
   id: number
@@ -105,16 +104,24 @@ export default function DocumentManager() {
           <Button variant="contained" size="small" onClick={openModal}>Add Directory</Button>
         </Box>
         <Box flexGrow={1} overflow="auto" p={1}>
-          <SimpleTreeView
-            selectedItems={[selectedDir]}
-            onSelectedItemsChange={(_, ids: string[]) => setSelectedDir(ids[0] ?? 'root')}
-          >
-            <TreeItem itemId="root" label="Root">
-              {directories.map((dir) => (
-                <TreeItem key={dir} itemId={dir} label={dir} />
-              ))}
-            </TreeItem>
-          </SimpleTreeView>
+          <List>
+            <ListItemButton
+              selected={selectedDir === 'root'}
+              onClick={() => setSelectedDir('root')}
+            >
+              <ListItemText primary="Root" />
+            </ListItemButton>
+            {directories.map((dir) => (
+              <ListItemButton
+                key={dir}
+                sx={{ pl: 2 }}
+                selected={selectedDir === dir}
+                onClick={() => setSelectedDir(dir)}
+              >
+                <ListItemText primary={dir} />
+              </ListItemButton>
+            ))}
+          </List>
         </Box>
         <Box p={1}>
           <Button variant="contained" onClick={triggerUpload}>Upload</Button>
