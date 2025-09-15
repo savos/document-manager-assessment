@@ -5,6 +5,8 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Typography from '@mui/material/Typography'
+import Link from '@mui/material/Link'
+import { useNavigate } from 'react-router-dom'
 
 interface FileItem {
   id: number
@@ -15,6 +17,7 @@ export default function DocumentManager() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate()
   const token = localStorage.getItem('token')
   const authHeader = token ? { Authorization: `Token ${token}` } : {}
 
@@ -39,6 +42,11 @@ export default function DocumentManager() {
     e.target.value = ''
   }
 
+  const handleSignOut = () => {
+    localStorage.removeItem('token')
+    navigate('/')
+  }
+
   const handleDownload = async () => {
     if (!selectedFile) return
     const response = await fetch(`/api/file_versions/${selectedFile.id}/download/`, {
@@ -59,6 +67,25 @@ export default function DocumentManager() {
 
   return (
     <Box display="flex" flexDirection="column" height="100vh" m={2}>
+      <Box
+        component="header"
+        mb={2}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography variant="h6">Document Manager</Typography>
+        <Link
+          href="#"
+          underline="hover"
+          onClick={(e) => {
+            e.preventDefault()
+            handleSignOut()
+          }}
+        >
+          Sign Out
+        </Link>
+      </Box>
       <Box display="flex" flexDirection="column" flexGrow={1} sx={{ width: '64ch' }}>
         <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
           <Box>
