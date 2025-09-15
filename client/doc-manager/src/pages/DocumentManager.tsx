@@ -58,16 +58,16 @@ export default function DocumentManager() {
   }
 
   return (
-    <Box display="flex" flexDirection="column" height="100vh" border={1} borderColor="grey.400">
-      <Box p={1} borderBottom={1} borderColor="grey.300" display="flex" justifyContent="flex-start">
+    <Box display="flex" flexDirection="column" height="100vh" m={2}>
+      <Box mb={2} display="flex">
         <Button variant="contained" onClick={triggerUpload}>Upload</Button>
         <input ref={fileInputRef} type="file" hidden onChange={handleUpload} />
       </Box>
       <Box flexGrow={1} display="flex" flexDirection="column">
-        <Box p={1} borderBottom={1} borderColor="grey.300">
+        <Box mb={2}>
           <Typography variant="subtitle1">Files</Typography>
         </Box>
-        <Box flexGrow={1} overflow="auto" p={1}>
+        <Box flexGrow={1} overflow="auto">
           <List>
             {files.map((file) => (
               <ListItemButton
@@ -80,7 +80,7 @@ export default function DocumentManager() {
             ))}
           </List>
         </Box>
-        <Box p={1} display="flex" justifyContent="flex-end">
+        <Box mt={2} display="flex" justifyContent="flex-end">
           <Button variant="contained" onClick={handleDownload} disabled={!selectedFile}>Download</Button>
         </Box>
       </Box>
