@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.views import APIView
 
-from propylon_document_manager.utils import FileUpload
+from propylon_document_manager.utils import FileDownload, FileUpload
 
 from ..models import FileVersion
 from .serializers import FileVersionSerializer
@@ -60,3 +60,20 @@ class FileUploadView(APIView):
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"digest_hex": file_upload.digest_hex}, status=status.HTTP_200_OK)
+
+
+class UserFileListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        downloader = FileDownload(filepath="placeholder.txt", user=request.user)
+        files = downloader.file_list()
+        return Response(files, status=status.HTTP_200_OK)
+
+
+class FileListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        files = FileDownload.get_all_files()
+        return Response(files, status=status.HTTP_200_OK)

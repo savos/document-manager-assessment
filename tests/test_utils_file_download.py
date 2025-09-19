@@ -80,6 +80,39 @@ def test_file_list_returns_empty_when_user_has_no_files(tmp_path: Path, user):
 
 
 @pytest.mark.django_db
+def test_get_all_files_returns_all_records():
+    first = FileVersion.objects.create(
+        file_name="alpha.txt",
+        version_number=0,
+        digest_hex="a" * 64,
+    )
+    second = FileVersion.objects.create(
+        file_name="beta.txt",
+        version_number=1,
+        digest_hex="b" * 64,
+    )
+
+    result = FileDownload.get_all_files()
+
+    expected = [
+        {
+            "id": first.id,
+            "file_name": "alpha.txt",
+            "version_number": 0,
+            "digest_hex": "a" * 64,
+        },
+        {
+            "id": second.id,
+            "file_name": "beta.txt",
+            "version_number": 1,
+            "digest_hex": "b" * 64,
+        },
+    ]
+
+    assert result == expected
+
+
+@pytest.mark.django_db
 def test_get_latest_version_raises_when_missing(tmp_path: Path):
     downloader = FileDownload(filepath=str(tmp_path / "missing.txt"))
 
