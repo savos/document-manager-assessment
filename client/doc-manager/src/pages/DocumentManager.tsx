@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import type { MouseEvent } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import List from '@mui/material/List'
@@ -14,11 +15,52 @@ interface FileItem {
 }
 
 export default function DocumentManager() {
-  const [files] = useState<FileItem[]>([])
+  const [files, setFiles] = useState<FileItem[]>([])
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
   const authHeader = token ? { Authorization: `Token ${token}` } : undefined
+
+  const fetchFiles = useCallback(
+    async (endpoint: string) => {
+      try {
+        const response = await fetch(endpoint, {
+          ...(token ? { headers: { Authorization: `Token ${token}` } } : {}),
+        })
+
+        if (!response.ok) {
+          setFiles([])
+          setSelectedFile(null)
+          return
+        }
+
+        const data: FileItem[] = await response.json()
+        setFiles(data)
+        setSelectedFile((previous) =>
+          previous && data.some((file) => file.id === previous.id) ? previous : null,
+        )
+      } catch (error) {
+        console.error('Unable to load files.', error)
+        setFiles([])
+        setSelectedFile(null)
+      }
+    },
+    [token],
+  )
+
+  useEffect(() => {
+    fetchFiles('/api/files/user/')
+  }, [fetchFiles])
+
+  const handleShowUserFiles = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+    fetchFiles('/api/files/user/')
+  }
+
+  const handleShowAllFiles = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+    fetchFiles('/api/files/')
+  }
 
   const handleDiff = () => {}
 
@@ -68,14 +110,17 @@ export default function DocumentManager() {
       </Box>
       <Box display="flex" flexDirection="column" flexGrow={1} pb={9} sx={{ width: '64ch' }}>
         <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
-          <Button variant="contained" disabled>
-            Upload
-          </Button>
+          <Button variant="contained">Upload</Button>
           <Button variant="contained" onClick={handleDownload} disabled={!selectedFile}>Download</Button>
         </Box>
         <Box flexGrow={1} display="flex" flexDirection="column">
-          <Box mb={2}>
-            <Typography variant="subtitle1">Files</Typography>
+          <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+            <Link href="#" underline="hover" onClick={handleShowUserFiles}>
+              Files
+            </Link>
+            <Link href="#" underline="hover" onClick={handleShowAllFiles}>
+              All Files
+            </Link>
           </Box>
           <Box flexGrow={1} overflow="auto">
             <List>
