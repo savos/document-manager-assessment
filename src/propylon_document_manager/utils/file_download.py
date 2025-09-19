@@ -4,16 +4,24 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Any, Mapping, Optional, Union
 
 from django.conf import settings
 from django.db.models import Max
+
+if TYPE_CHECKING:
+    from propylon_document_manager.file_versions.models import User
 
 
 class FileDownload:
     """Fetch metadata for stored file versions."""
 
-    def __init__(self, filepath: Union[str, Path], version: Optional[int] = None):
+    def __init__(
+        self,
+        filepath: Union[str, Path],
+        version: Optional[int] = None,
+        user: Optional["User"] = None,
+    ):
         if not filepath:
             raise ValueError("A file path must be provided.")
 
@@ -24,6 +32,45 @@ class FileDownload:
             self.version = int(version)
         else:
             self.version = None
+        self.user = user
+
+    def get_files_of_user(self, user: Optional["User"] = None) -> list[int]:
+        """Return IDs of file versions owned by the provided or configured user."""
+
+        from propylon_document_manager.file_versions.models import UserFileVersion
+
+        target_user = user if user is not None else self.user
+        if target_user is None or not getattr(target_user, "is_authenticated", False):
+            return []
+
+        if getattr(target_user, "pk", None) is None:
+            return []
+
+        return list(
+            UserFileVersion.objects.filter(user=target_user)
+            .values_list("fileversion_id", flat=True)
+            .distinct()
+        )
+
+    def file_list(self, user: Optional["User"] = None) -> list[dict[str, Any]]:
+        """Return metadata for all file versions available to the current user."""
+
+        from propylon_document_manager.file_versions.models import FileVersion
+
+        file_version_ids = self.get_files_of_user(user=user)
+        if not file_version_ids:
+            return []
+
+        records = (
+            FileVersion.objects.filter(id__in=file_version_ids)
+            .values("file_name", "version_number")
+            .order_by("file_name", "version_number")
+        )
+
+        return [
+            {"file_name": record["file_name"], "version": record["version_number"]}
+            for record in records
+        ]
 
     def get_file_data(self) -> Mapping[str, Any]:
         """Return metadata for the configured file path and version."""
