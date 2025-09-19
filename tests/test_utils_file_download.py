@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from propylon_document_manager.file_versions.models import FileVersion
+from propylon_document_manager.file_versions.models import FileVersion, UserFileVersion
 from propylon_document_manager.utils import FileDownload
 
 
@@ -25,6 +25,58 @@ def test_get_max_version_returns_highest_value(tmp_path: Path):
     downloader = FileDownload(filepath=str(file_path))
 
     assert downloader._get_max_version() == 3
+
+
+@pytest.mark.django_db
+def test_get_files_of_user_returns_ids_for_authenticated_user(
+    tmp_path: Path, user, user_factory
+):
+    first_version = FileVersion.objects.create(file_name="first.txt", version_number=0)
+    second_version = FileVersion.objects.create(file_name="second.txt", version_number=2)
+    other_user = user_factory()
+
+    UserFileVersion.objects.create(fileversion=first_version, user=user)
+    UserFileVersion.objects.create(fileversion=second_version, user=user)
+    UserFileVersion.objects.create(fileversion=second_version, user=other_user)
+
+    downloader = FileDownload(filepath=str(tmp_path / "example.txt"), user=user)
+
+    result = downloader.get_files_of_user()
+
+    assert set(result) == {first_version.id, second_version.id}
+
+
+@pytest.mark.django_db
+def test_get_files_of_user_returns_empty_without_user(tmp_path: Path):
+    downloader = FileDownload(filepath=str(tmp_path / "unassigned.txt"))
+
+    assert downloader.get_files_of_user() == []
+
+
+@pytest.mark.django_db
+def test_file_list_returns_metadata_for_user(tmp_path: Path, user):
+    first_version = FileVersion.objects.create(file_name="alpha.txt", version_number=0)
+    second_version = FileVersion.objects.create(file_name="beta.txt", version_number=1)
+    UserFileVersion.objects.create(fileversion=first_version, user=user)
+    UserFileVersion.objects.create(fileversion=second_version, user=user)
+
+    downloader = FileDownload(filepath=str(tmp_path / "placeholder.txt"), user=user)
+
+    result = downloader.file_list()
+
+    expected = [
+        {"file_name": "alpha.txt", "version": 0},
+        {"file_name": "beta.txt", "version": 1},
+    ]
+
+    assert result == expected
+
+
+@pytest.mark.django_db
+def test_file_list_returns_empty_when_user_has_no_files(tmp_path: Path, user):
+    downloader = FileDownload(filepath=str(tmp_path / "placeholder.txt"), user=user)
+
+    assert downloader.file_list() == []
 
 
 @pytest.mark.django_db
