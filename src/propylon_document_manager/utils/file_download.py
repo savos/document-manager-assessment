@@ -30,7 +30,7 @@ class FileDownload:
 
         return self._get_file_data(filepath=self.filepath, version=self.version)
 
-    def _get_max_version(self, filepath: Optional[Union[str, Path]] = None) -> int:
+    def _get_latest_version(self, filepath: Optional[Union[str, Path]] = None) -> int:
         """Return the latest stored version number for the file."""
 
         from propylon_document_manager.file_versions.models import FileVersion
@@ -58,7 +58,7 @@ class FileDownload:
 
         target_path = str(filepath)
         resolved_version = (
-            self._get_max_version(target_path)
+            self._get_latest_version(target_path)
             if version is None
             else int(version)
         )

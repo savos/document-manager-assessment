@@ -17,22 +17,22 @@ def test_init_rejects_negative_version(tmp_path: Path):
 
 
 @pytest.mark.django_db
-def test_get_max_version_returns_highest_value(tmp_path: Path):
+def test_get_latest_version_returns_highest_value(tmp_path: Path):
     file_path = tmp_path / "example.txt"
     FileVersion.objects.create(file_name=str(file_path), version_number=0)
     FileVersion.objects.create(file_name=str(file_path), version_number=3)
 
     downloader = FileDownload(filepath=str(file_path))
 
-    assert downloader._get_max_version() == 3
+    assert downloader._get_latest_version() == 3
 
 
 @pytest.mark.django_db
-def test_get_max_version_raises_when_missing(tmp_path: Path):
+def test_get_latest_version_raises_when_missing(tmp_path: Path):
     downloader = FileDownload(filepath=str(tmp_path / "missing.txt"))
 
     with pytest.raises(FileVersion.DoesNotExist):
-        downloader._get_max_version()
+        downloader._get_latest_version()
 
 
 @pytest.mark.django_db
