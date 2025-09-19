@@ -108,3 +108,61 @@ def test_file_upload_duplicate_detection_returns_false(tmp_path):
     uploader = FileUpload(file_path)
 
     assert uploader.check_duplicate() is False
+
+
+@pytest.mark.django_db
+def test_file_list_endpoint_returns_all_files(user):
+    first = FileVersion.objects.create(
+        file_name="alpha.txt",
+        version_number=0,
+        digest_hex="a" * 64,
+    )
+    second = FileVersion.objects.create(
+        file_name="beta.txt",
+        version_number=1,
+        digest_hex="b" * 64,
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    response = client.get("/api/files/")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": first.id,
+            "file_name": "alpha.txt",
+            "version_number": 0,
+            "digest_hex": "a" * 64,
+        },
+        {
+            "id": second.id,
+            "file_name": "beta.txt",
+            "version_number": 1,
+            "digest_hex": "b" * 64,
+        },
+    ]
+
+
+@pytest.mark.django_db
+def test_user_file_list_endpoint_returns_files_for_authenticated_user(user, user_factory):
+    first = FileVersion.objects.create(file_name="alpha.txt", version_number=0)
+    second = FileVersion.objects.create(file_name="beta.txt", version_number=1)
+    other_version = FileVersion.objects.create(file_name="gamma.txt", version_number=2)
+
+    UserFileVersion.objects.create(fileversion=first, user=user)
+    UserFileVersion.objects.create(fileversion=second, user=user)
+    other_user = user_factory()
+    UserFileVersion.objects.create(fileversion=other_version, user=other_user)
+
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    response = client.get("/api/files/user/")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"file_name": "alpha.txt", "version": 0},
+        {"file_name": "beta.txt", "version": 1},
+    ]

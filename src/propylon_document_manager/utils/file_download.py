@@ -72,6 +72,20 @@ class FileDownload:
             for record in records
         ]
 
+    @staticmethod
+    def get_all_files() -> list[Mapping[str, Any]]:
+        """Return metadata for every stored file version."""
+
+        from propylon_document_manager.file_versions.models import FileVersion
+
+        records = (
+            FileVersion.objects.all()
+            .values("id", "file_name", "version_number", "digest_hex")
+            .order_by("file_name", "version_number", "id")
+        )
+
+        return list(records)
+
     def get_file_data(self) -> Mapping[str, Any]:
         """Return metadata for the configured file path and version."""
 
